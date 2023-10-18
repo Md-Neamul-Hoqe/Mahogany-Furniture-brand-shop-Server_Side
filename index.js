@@ -34,6 +34,61 @@ async function run() {
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
 
+        app.post('/user', async (req, res) => {
+            const user = req.body;
+            console.log(user);
+            const result = await userCollection.insertOne(user);
+            res.send(result);
+        })
+        
+
+        /**
+         *  if get 
+         * [
+         * PATCH http://localhost:5000/user 404 (Not Found) Uncaught (in promise), 
+         * SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+         * ] Error then check :=> 
+         * ======================
+         * -> the URI in fetch is correct & same as server side pathname
+         * -> the method name in server side app.[method name] & in client side on fetch 2nd parameter method
+        */
+        /**
+         *  if get 
+         * [
+         * Uncaught (in promise) TypeError: Failed to execute 'fetch' on 'Window': Request with GET/HEAD method cannot have body.
+         * ] Error then check :=> 
+         * ======================
+         * -> the method name in server side app.[method name] & in client side on fetch 2nd parameter method
+        */
+        /**
+         * if DB not updated / modified 
+         * without any Error then check :=> 
+         * ===============================
+         *  -> the property name or value in client site fetch 2nd parameter like 'content-type', headers etc 
+         * */
+
+        app.patch('/user', async (req, res) => {
+            const user = req.body;
+            const query = { email: user.email };
+
+            const updateDoc = {
+                $set: {
+                    lastSignInAt: user.lastSignInAt
+                }
+            }
+
+            const result = await userCollection.updateOne(query, updateDoc)
+            res.send(result);
+        })
+
+        app.delete('/user/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            console.log(id);
+            const result = await userCollection.deleteOne(query);
+            console.log(result);
+            res.send(result);
+        })
 
 
     } catch (error) {
