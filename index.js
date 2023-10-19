@@ -13,7 +13,9 @@ app.use(express.json());
 
 // const uri = "https://mahogany-furniture-server-5z8ga4sbo-muhammad-neamul-hoqes-projects.vercel.app";
 // const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.481il7d.mongodb.net/?retryWrites=true&w=majority`;
-const uri = 'mongodb://127.0.0.1:27017';
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@assignment-10.v0k6exy.mongodb.net/?retryWrites=true&w=majority`;
+
+// const uri = 'mongodb://127.0.0.1:27017';
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
     serverApi: {
@@ -29,18 +31,45 @@ async function run() {
 
         const productCollection = client.db('Mahogany').collection("furniture");
         const userCollection = client.db('Mahogany').collection('users');
+        const brandCollection = client.db('Mahogany').collection('brands');
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
 
-        app.post('/user', async (req, res) => {
+        /* Inset one user to the database */
+        app.post('/users', async (req, res) => {
             const user = req.body;
-            console.log(user);
+
             const result = await userCollection.insertOne(user);
             res.send(result);
         })
-        
+
+        /* Inset one product to the database */
+        app.post('/products', async (req, res) => {
+            const newProduct = req.body;
+
+            const result = await productCollection.insertOne(newProduct);
+            res.send(result);
+        })
+
+        /* Get all products from the database */
+        app.get('/products', async (req, res) => {
+            const cursor = productCollection.find();
+
+            const result = await cursor.toArray();
+
+            res.send(result);
+        })
+
+
+
+        /* User APIs */
+        app.get('/users', async (req, res) => {
+            /* find users from the database table `userCollection`& form an array of users object */
+            const result = await userCollection.find().toArray();
+            res.send(result);
+        })
 
         /**
          *  if get 
@@ -67,7 +96,7 @@ async function run() {
          *  -> the property name or value in client site fetch 2nd parameter like 'content-type', headers etc 
          * */
 
-        app.patch('/user', async (req, res) => {
+        app.patch('/users', async (req, res) => {
             const user = req.body;
             const query = { email: user.email };
 
@@ -81,12 +110,12 @@ async function run() {
             res.send(result);
         })
 
-        app.delete('/user/:id', async (req, res) => {
+        app.delete('/users/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
-            console.log(id);
+
             const result = await userCollection.deleteOne(query);
-            console.log(result);
+
             res.send(result);
         })
 
@@ -112,3 +141,81 @@ app.listen(port, () => {
     console.log(`App's server is running on PORT: ${port}`);
 })
 
+// DB_USER=CoffeeMaster
+// # DB_PASS=JOEyGX1lVEw1vaZz
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// # const { MongoClient, ServerApiVersion } = require('mongodb');
+// # const uri = "mongodb+srv://mdneamulhoqe:<password>@assignment-10.v0k6exy.mongodb.net/?retryWrites=true&w=majority";
+
+// # // Create a MongoClient with a MongoClientOptions object to set the Stable API version
+// # const client = new MongoClient(uri, {
+// #   serverApi: {
+// #     version: ServerApiVersion.v1,
+// #     strict: true,
+// #     deprecationErrors: true,
+// #   }
+// # });
+
+// # async function run() {
+// #   try {
+// #     // Connect the client to the server	(optional starting in v4.7)
+// #     await client.connect();
+// #     // Send a ping to confirm a successful connection
+// #     await client.db("admin").command({ ping: 1 });
+// #     console.log("Pinged your deployment. You successfully connected to MongoDB!");
+// #   } finally {
+// #     // Ensures that the client will close when you finish/error
+// #     await client.close();
+// #   }
+// # }
+// # run().catch(console.dir);
