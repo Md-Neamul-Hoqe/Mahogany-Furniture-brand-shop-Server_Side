@@ -53,6 +53,15 @@ async function run() {
             res.send(result);
         })
 
+
+        /* User APIs */
+        app.get('/users', async (req, res) => {
+            /* find users from the database table `userCollection`& form an array of users object */
+            const result = await userCollection.find().toArray();
+            res.send(result);
+        })
+
+
         /* Get all products from the database */
         app.get('/products', async (req, res) => {
             const cursor = productCollection.find();
@@ -62,6 +71,16 @@ async function run() {
             res.send(result);
         })
 
+        /* to update a product first need to get the product & then edit & then use app.put/patch to update in server */
+        app.get('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await productCollection.findOne(query);
+
+            console.log(id, result);
+
+            res.send(result);
+        })
 
         /* Get The brands from the database */
         app.get('/brands', async (req, res) => {
@@ -80,20 +99,24 @@ async function run() {
             res.send(result);
         })
 
-        app.put('/products/:id', async (req, res) => {
-            const id = req.params.id;
-            const updatedProduct = req.body;
+        app.patch('/products', async (req, res) => {
+            const updatedProperties = req.body;
+            const id = updatedProperties.id;
+
             const query = { _id: new ObjectId(id) };
             const options = { upsert: true }
+
+            console.log(id, updatedProperties, query);
+
             const product = {
                 $set: {
-                    name: updatedProduct.name,
-                    chef: updatedProduct.chef,
-                    supplier: updatedProduct.supplier,
-                    taste: updatedProduct.taste,
-                    category: updatedProduct.category,
-                    details: updatedProduct.details,
-                    photo: updatedProduct.photo,
+                    title: updatedProperties.title,
+                    subtitle: updatedProperties.subtitle,
+                    brand: updatedProperties.brand,
+                    type: updatedProperties.type,
+                    tags: updatedProperties.tags,
+                    details: updatedProperties.details,
+                    photo: updatedProperties.photo,
                 }
             }
 
@@ -102,31 +125,28 @@ async function run() {
             res.send(result);
         })
 
-        /* to update a product first need to get the product & then edit & then use app.put to update in server */
-        app.get('/products/:id', async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: new ObjectId(id) };
-            const result = await productCollection.findOne(query);
+        /* Update an User */
+        app.patch('/users', async (req, res) => {
+            const user = req.body;
+            const query = { email: user.email };
 
+            const updateDoc = {
+                $set: {
+                    lastSignInAt: user.lastSignInAt
+                }
+            }
+
+            const result = await userCollection.updateOne(query, updateDoc)
             res.send(result);
         })
-
-
-        /* must use delete to execute delete */
+        
+        /* Delete a product */
         app.delete('/products/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
 
             const result = await productCollection.deleteOne(query);
 
-            res.send(result);
-        })
-
-
-        /* User APIs */
-        app.get('/users', async (req, res) => {
-            /* find users from the database table `userCollection`& form an array of users object */
-            const result = await userCollection.find().toArray();
             res.send(result);
         })
 
@@ -155,20 +175,8 @@ async function run() {
          *  -> the property name or value in client site fetch 2nd parameter like 'content-type', headers etc 
          * */
 
-        app.patch('/users', async (req, res) => {
-            const user = req.body;
-            const query = { email: user.email };
 
-            const updateDoc = {
-                $set: {
-                    lastSignInAt: user.lastSignInAt
-                }
-            }
-
-            const result = await userCollection.updateOne(query, updateDoc)
-            res.send(result);
-        })
-
+        /* Delete the user */
         app.delete('/users/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
