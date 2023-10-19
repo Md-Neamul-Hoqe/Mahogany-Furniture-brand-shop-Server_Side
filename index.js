@@ -80,6 +80,48 @@ async function run() {
             res.send(result);
         })
 
+        app.put('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedProduct = req.body;
+            const query = { _id: new ObjectId(id) };
+            const options = { upsert: true }
+            const product = {
+                $set: {
+                    name: updatedProduct.name,
+                    chef: updatedProduct.chef,
+                    supplier: updatedProduct.supplier,
+                    taste: updatedProduct.taste,
+                    category: updatedProduct.category,
+                    details: updatedProduct.details,
+                    photo: updatedProduct.photo,
+                }
+            }
+
+            const result = await productCollection.updateOne(query, product, options);
+
+            res.send(result);
+        })
+
+        /* to update a product first need to get the product & then edit & then use app.put to update in server */
+        app.get('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await productCollection.findOne(query);
+
+            res.send(result);
+        })
+
+
+        /* must use delete to execute delete */
+        app.delete('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+
+            const result = await productCollection.deleteOne(query);
+
+            res.send(result);
+        })
+
 
         /* User APIs */
         app.get('/users', async (req, res) => {
