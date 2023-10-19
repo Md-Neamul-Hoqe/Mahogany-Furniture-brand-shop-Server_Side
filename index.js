@@ -63,6 +63,23 @@ async function run() {
         })
 
 
+        /* Get The brands from the database */
+        app.get('/brands', async (req, res) => {
+            const result = await brandCollection.find().toArray();
+            res.send(result);
+        })
+
+        /* Get all products of a brand from the database */
+        app.get('/shop/:brand', async (req, res) => {
+            const brand = req.params.brand;
+
+            const query = { brand: brand };
+
+            const result = await productCollection.find(query).toArray();
+
+            res.send(result);
+        })
+
 
         /* User APIs */
         app.get('/users', async (req, res) => {
