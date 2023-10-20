@@ -33,6 +33,9 @@ async function run() {
         const userCollection = client.db('Mahogany').collection('users');
         const brandCollection = client.db('Mahogany').collection('brands');
 
+        /* save cart after sign in, without sign in save in local storage */
+        const cartCollection = client.db('Mahogany').collection('cart');
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -40,7 +43,7 @@ async function run() {
         /* Inset one user to the database */
         app.post('/users', async (req, res) => {
             const user = req.body;
-
+            
             const result = await userCollection.insertOne(user);
             res.send(result);
         })
@@ -130,16 +133,16 @@ async function run() {
             const user = req.body;
             const query = { email: user.email };
 
-            const updateDoc = {
+            const updateUser = {
                 $set: {
                     lastSignInAt: user.lastSignInAt
                 }
             }
 
-            const result = await userCollection.updateOne(query, updateDoc)
+            const result = await userCollection.updateOne(query, updateUser)
             res.send(result);
         })
-        
+
         /* Delete a product */
         app.delete('/products/:id', async (req, res) => {
             const id = req.params.id;
