@@ -8,14 +8,23 @@ const port = process.env.PORT || 5000;
 const app = express();
 
 /* middleware */
-app.use(cors());
+// const corsConfig = {
+//     origin: '',
+//     credentials: true,
+//     methods: [ 'GET', 'POST', 'PATCH', 'PUT', 'DELETE' ]
+// }
+// app.use(cors(corsConfig))
+// app.options("", cors(corsConfig))
+
+app.use(cors())
+
 app.use(express.json());
 
 // const uri = "https://mahogany-furniture-server-5z8ga4sbo-muhammad-neamul-hoqes-projects.vercel.app";
 // const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.481il7d.mongodb.net/?retryWrites=true&w=majority`;
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@assignment-10.v0k6exy.mongodb.net/?retryWrites=true&w=majority`;
+// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@assignment-10.v0k6exy.mongodb.net/?retryWrites=true&w=majority`;
 
-// const uri = 'mongodb://127.0.0.1:27017';
+const uri = 'mongodb://127.0.0.1:27017';
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
     serverApi: {
@@ -27,7 +36,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
     try {
-        await client.connect();
+        // await client.connect();
 
         const productCollection = client.db('Mahogany').collection("furniture");
         const userCollection = client.db('Mahogany').collection('users');
@@ -43,7 +52,7 @@ async function run() {
         /* Inset one user to the database */
         app.post('/users', async (req, res) => {
             const user = req.body;
-            
+
             const result = await userCollection.insertOne(user);
             res.send(result);
         })
@@ -56,14 +65,12 @@ async function run() {
             res.send(result);
         })
 
-
         /* User APIs */
         app.get('/users', async (req, res) => {
             /* find users from the database table `userCollection`& form an array of users object */
             const result = await userCollection.find().toArray();
             res.send(result);
         })
-
 
         /* Get all products from the database */
         app.get('/products', async (req, res) => {
@@ -79,8 +86,6 @@ async function run() {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await productCollection.findOne(query);
-
-            console.log(id, result);
 
             res.send(result);
         })
@@ -178,13 +183,65 @@ async function run() {
          *  -> the property name or value in client site fetch 2nd parameter like 'content-type', headers etc 
          * */
 
+        /* Cart APIs */
+        app.get('/cart', async (req, res) => {
+            /* find users from the database table `userCollection`& form an array of users object */
+            const result = await cartCollection.find().toArray();
+            res.send(result);
+        })
 
-        /* Delete the user */
-        app.delete('/users/:id', async (req, res) => {
+        app.get('/cart/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
 
-            const result = await userCollection.deleteOne(query);
+            /* find users from the database table `userCollection`& form an array of users object */
+            const result = await cartCollection.findOne(query, { upsert: true });
+            res.send(result);
+        })
+
+        /* Inset one product to the database */
+        app.post('/cart', async (req, res) => {
+            const newProduct = req.body;
+
+            console.log(newProduct);
+
+            const result = await cartCollection.insertOne(newProduct);
+            res.send(result);
+        })
+
+        app.patch(`/cart/:id`, async (req, res) => {
+            const newProduct = req.body;
+            const id = req.params.id;
+
+            const query = { _id: new ObjectId(id) };
+
+            const updateProduct = {
+                $set: {
+                    _id: new ObjectId(id),
+                    purchase: newProduct.purchase,
+                    title: newProduct.title,
+                    subtitle: newProduct.subtitle,
+                    brand: newProduct.brand,
+                    type: newProduct.type,
+                    tags: newProduct.tags,
+                    price: newProduct.price,
+                    ratings: newProduct.ratings,
+                    description: newProduct.description,
+                    status: newProduct.status,
+                }
+            }
+
+            const result = await cartCollection.updateOne(query, updateProduct, { upsert: true })
+            res.send(result);
+        })
+
+
+        /* Delete a product from cart */
+        app.delete('/cart/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+
+            const result = await cartCollection.deleteOne(query);
 
             res.send(result);
         })
@@ -213,79 +270,3 @@ app.listen(port, () => {
 
 // DB_USER=CoffeeMaster
 // # DB_PASS=JOEyGX1lVEw1vaZz
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// # const { MongoClient, ServerApiVersion } = require('mongodb');
-// # const uri = "mongodb+srv://mdneamulhoqe:<password>@assignment-10.v0k6exy.mongodb.net/?retryWrites=true&w=majority";
-
-// # // Create a MongoClient with a MongoClientOptions object to set the Stable API version
-// # const client = new MongoClient(uri, {
-// #   serverApi: {
-// #     version: ServerApiVersion.v1,
-// #     strict: true,
-// #     deprecationErrors: true,
-// #   }
-// # });
-
-// # async function run() {
-// #   try {
-// #     // Connect the client to the server	(optional starting in v4.7)
-// #     await client.connect();
-// #     // Send a ping to confirm a successful connection
-// #     await client.db("admin").command({ ping: 1 });
-// #     console.log("Pinged your deployment. You successfully connected to MongoDB!");
-// #   } finally {
-// #     // Ensures that the client will close when you finish/error
-// #     await client.close();
-// #   }
-// # }
-// # run().catch(console.dir);
