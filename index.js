@@ -20,11 +20,12 @@ app.use(cors())
 
 app.use(express.json());
 
-// const uri = "https://mahogany-furniture-server-5z8ga4sbo-muhammad-neamul-hoqes-projects.vercel.app";
-// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.481il7d.mongodb.net/?retryWrites=true&w=majority`;
-// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@assignment-10.v0k6exy.mongodb.net/?retryWrites=true&w=majority`;
 
-const uri = 'mongodb://127.0.0.1:27017';
+/* online mongodb */
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@assignment-10.v0k6exy.mongodb.net/?retryWrites=true&w=majority`;
+
+/* For local */
+// const uri = 'mongodb://127.0.0.1:27017';
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
     serverApi: {
@@ -191,13 +192,25 @@ async function run() {
         })
 
         app.get('/cart/:id', async (req, res) => {
+            console.log(typeof id);
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
 
             /* find users from the database table `userCollection`& form an array of users object */
-            const result = await cartCollection.findOne(query, { upsert: true });
+            const result = await cartCollection.findOne(query);
             res.send(result);
         })
+
+        /* get the cart of a specific user */
+        // app.get('/cart/:email', async (req, res) => {
+        //     console.log(typeof email);
+        //     const email = req.params.email;
+        //     const query = { email: email }
+
+        //     /* find users from the database table `userCollection`& form an array of users object */
+        //     const result = await cartCollection.findOne(query);
+        //     res.send(result);
+        // })
 
         /* Inset one product to the database */
         app.post('/cart', async (req, res) => {
@@ -211,11 +224,12 @@ async function run() {
             const newProduct = req.body;
             const id = req.params.id;
 
-            const query = { _id: new ObjectId(id) };
+            console.log(id);
+
+            const query = { _id: id };
 
             const updateProduct = {
                 $set: {
-                    _id: new ObjectId(id),
                     purchase: newProduct.purchase,
                     title: newProduct.title,
                     subtitle: newProduct.subtitle,
@@ -237,7 +251,10 @@ async function run() {
         /* Delete a product from cart */
         app.delete('/cart/:id', async (req, res) => {
             const id = req.params.id;
-            const query = { _id: new ObjectId(id) }
+
+            console.log(id);
+
+            const query = { _id: id }
 
             const result = await cartCollection.deleteOne(query);
 
@@ -265,6 +282,3 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`App's server is running on PORT: ${port}`);
 })
-
-// DB_USER=CoffeeMaster
-// # DB_PASS=JOEyGX1lVEw1vaZz
