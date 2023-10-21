@@ -203,8 +203,6 @@ async function run() {
         app.post('/cart', async (req, res) => {
             const newProduct = req.body;
 
-            console.log(newProduct);
-
             const result = await cartCollection.insertOne(newProduct);
             res.send(result);
         })
