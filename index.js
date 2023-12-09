@@ -20,6 +20,9 @@ app.use(cors())
 
 app.use(express.json());
 
+/* Change local uri in front end site using this */
+// https://mahogany-furniture-server.vercel.app
+// http://127.0.0.1:5000
 
 /* online mongodb */
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@assignment-10.v0k6exy.mongodb.net/?retryWrites=true&w=majority`;
@@ -47,8 +50,8 @@ async function run() {
         const cartCollection = client.db('Mahogany').collection('cart');
 
         // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
-        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+        // await client.db("admin").command({ ping: 1 });
+        // console.log("Pinged your deployment. You successfully connected to MongoDB!");
 
         /* Inset one user to the database */
         app.post('/users', async (req, res) => {
@@ -67,18 +70,18 @@ async function run() {
         })
 
         /* User APIs */
-        app.get('/users', async (req, res) => {
+        app.get('/users', async (_req, res) => {
             /* find users from the database table `userCollection`& form an array of users object */
             const result = await userCollection.find().toArray();
             res.send(result);
         })
 
         /* Get all products from the database */
-        app.get('/products', async (req, res) => {
+        app.get('/products', async (_req, res) => {
             const cursor = productCollection.find();
 
             const result = await cursor.toArray();
-
+            console.log(result);
             res.send(result);
         })
 
@@ -92,7 +95,7 @@ async function run() {
         })
 
         /* Get The brands from the database */
-        app.get('/brands', async (req, res) => {
+        app.get('/brands', async (_req, res) => {
             const result = await brandCollection.find().toArray();
             res.send(result);
         })
